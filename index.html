@@ -1,0 +1,189 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+  <meta name="apple-mobile-web-app-capable" content="yes">
+  <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+  <meta name="theme-color" content="#1a1a2e">
+  <title>💰 현금 출납부</title>
+  <link rel="manifest" href="manifest.json">
+  <link rel="stylesheet" href="styles.css">
+</head>
+<body>
+  <div class="app">
+    <header>
+      <h1>💰 현금 출납부</h1>
+      <div class="balance">
+        <span>잔액:</span>
+        <span id="balance" class="balance-value">₩0</span>
+      </div>
+    </header>
+
+    <nav>
+      <button class="nav-btn active" data-tab="add">➕ 등록</button>
+      <button class="nav-btn" data-tab="list">📋 내역</button>
+      <button class="nav-btn" data-tab="stats">📊 통계</button>
+    </nav>
+
+    <main>
+      <!-- 등록 탭 -->
+      <section id="tab-add" class="tab-content active">
+        <form id="transaction-form">
+          <div class="form-group">
+            <label>구분</label>
+            <div class="type-toggle">
+              <button type="button" class="type-btn active" data-type="income">입금</button>
+              <button type="button" class="type-btn" data-type="expense">출금</button>
+            </div>
+          </div>
+
+          <div class="form-group">
+            <label for="amount">금액 (₩)</label>
+            <input type="number" id="amount" placeholder="0" inputmode="numeric" required>
+          </div>
+
+          <div class="form-group">
+            <label for="date">날짜</label>
+            <input type="date" id="date" required>
+          </div>
+
+          <div class="form-group">
+            <label for="time">시간</label>
+            <input type="time" id="time">
+          </div>
+
+          <div class="form-group">
+            <label for="category1">분류1 (필수)</label>
+            <div class="category-input-group">
+              <select id="category1" required>
+                <option value="">선택하세요</option>
+              </select>
+              <button type="button" class="add-cat-btn" onclick="addNewCategory(1)">+</button>
+            </div>
+            <input type="text" id="category1-new" placeholder="직접 입력 후 + 버튼" class="new-category">
+          </div>
+
+          <div class="form-group">
+            <label for="category2">분류2</label>
+            <div class="category-input-group">
+              <select id="category2">
+                <option value="">선택하세요 (선택사항)</option>
+              </select>
+              <button type="button" class="add-cat-btn" onclick="addNewCategory(2)">+</button>
+            </div>
+            <input type="text" id="category2-new" placeholder="직접 입력 후 + 버튼" class="new-category">
+          </div>
+
+          <div class="form-group">
+            <label for="category3">분류3</label>
+            <div class="category-input-group">
+              <select id="category3">
+                <option value="">선택하세요 (선택사항)</option>
+              </select>
+              <button type="button" class="add-cat-btn" onclick="addNewCategory(3)">+</button>
+            </div>
+            <input type="text" id="category3-new" placeholder="직접 입력 후 + 버튼" class="new-category">
+          </div>
+
+          <div class="form-group">
+            <label for="note">메모</label>
+            <textarea id="note" placeholder="메모 (선택사항)" rows="2"></textarea>
+          </div>
+
+          <button type="submit" class="btn-primary">💾 저장</button>
+        </form>
+      </section>
+
+      <!-- 내역 탭 -->
+      <section id="tab-list" class="tab-content">
+        <div class="filter-section">
+          <div class="filter-row">
+            <select id="filter-type" class="filter-select">
+              <option value="">전체 구분</option>
+              <option value="income">입금</option>
+              <option value="expense">출금</option>
+            </select>
+            <select id="filter-year" class="filter-select">
+              <option value="">전체 연도</option>
+            </select>
+            <select id="filter-month" class="filter-select">
+              <option value="">전체 월</option>
+            </select>
+          </div>
+          <div class="filter-row">
+            <select id="filter-cat1" class="filter-select">
+              <option value="">전체 분류1</option>
+            </select>
+            <select id="filter-cat2" class="filter-select">
+              <option value="">전체 분류2</option>
+            </select>
+            <input type="text" id="filter-keyword" class="filter-input" placeholder="메모 검색">
+          </div>
+        </div>
+        <div class="list-header">
+          <span id="result-count" class="result-count">0건</span>
+          <button id="export-excel" class="btn-secondary">📥 엑셀</button>
+        </div>
+        <div id="transaction-list" class="transaction-list"></div>
+      </section>
+
+      <!-- 통계 탭 -->
+      <section id="tab-stats" class="tab-content">
+        <div class="stats-cards">
+          <div class="stat-card income">
+            <span>총 입금</span>
+            <strong id="total-income">₩0</strong>
+          </div>
+          <div class="stat-card expense">
+            <span>총 출금</span>
+            <strong id="total-expense">₩0</strong>
+          </div>
+        </div>
+        <div class="category-stats" id="category-stats"></div>
+      </section>
+    </main>
+
+    <footer>
+      <button id="backup-data">
+        <span>💾</span>
+        백업
+      </button>
+      <button id="restore-data">
+        <span>📂</span>
+        복원
+      </button>
+      <button id="manage-categories">
+        <span>🏷️</span>
+        분류
+      </button>
+      <button id="clear-data">
+        <span>🗑️</span>
+        삭제
+      </button>
+    </footer>
+    
+    <input type="file" id="restore-file" accept=".json" style="display:none;">
+  </div>
+
+  <!-- 분류 관리 모달 -->
+  <div id="category-modal" class="modal">
+    <div class="modal-content">
+      <h2>🏷️ 분류 관리</h2>
+      <div id="category-list"></div>
+      <button id="close-modal" class="btn-secondary">닫기</button>
+    </div>
+  </div>
+
+  <!-- 편집 모달 -->
+  <div id="edit-modal" class="modal">
+    <div class="modal-content">
+      <h2>✏️ 내역 편집</h2>
+      <form id="edit-form"></form>
+      <button id="close-edit-modal" class="btn-secondary">닫기</button>
+    </div>
+  </div>
+
+  <script src="app.js"></script>
+</body>
+</html>
